@@ -64,3 +64,54 @@ def select_options(options: List[str], single_select: bool = False) -> List[str]
                 raise ValueError("Input numbers are out of range.")
         except ValueError as e:
             print(f"Invalid input: {e}. Please try again.")
+
+import os
+from pathlib import Path
+
+def interactively_select_directory(root_path: Path) -> str:
+    """Navigate directories interactively and return the selected directory path."""
+    current_path = os.path.abspath(root_path)
+
+    while True:
+        # Get directories in the current path
+        dirs = [d for d in os.listdir(current_path) if os.path.isdir(os.path.join(current_path, d))]
+        dirs.sort()
+
+        # Display current path and available directories
+        print(f"\nCurrent Directory: {current_path}\n")
+        for i, directory in enumerate(dirs):
+            print(f"{i}: {directory}")
+
+        print("\nOptions:")
+        print("  - Enter a number to navigate into a directory.")
+        print("  - Type 'b' to go back.")
+        print("  - Type 'n' to create a new directory.")
+        print("  - Press Enter to select this directory.")
+
+        choice = input("\nChoice: ").strip()
+
+        if choice == "":
+            return current_path  # User confirms selection
+
+        elif choice.lower() == "b":
+            parent_path = os.path.dirname(current_path)
+            if parent_path != current_path:  # Prevent going above root
+                current_path = parent_path
+
+        elif choice.lower() == "n":
+            new_dir_name = input("Enter new directory name: ").strip()
+            if new_dir_name:
+                new_dir_path = os.path.join(current_path, new_dir_name)
+                try:
+                    os.makedirs(new_dir_path, exist_ok=True)
+                    print(f"Directory '{new_dir_name}' created.")
+                except Exception as e:
+                    print(f"Error creating directory: {e}")
+
+        elif choice.isdigit():
+            index = int(choice)
+            if 0 <= index < len(dirs):
+                current_path = os.path.join(current_path, dirs[index])
+
+        else:
+            print("Invalid choice, please try again.")
