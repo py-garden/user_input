@@ -1,4 +1,41 @@
-from typing import List
+from typing import List, Callable
+
+def has_no_spaces(s: str) -> bool:
+    return ' ' not in s
+
+def get_validated_input(input_func: Callable[[], str], is_valid: Callable[[str], bool], invalid_message: str) -> str:
+    """
+    Repeatedly calls input_func until the result passes is_valid.
+
+    Args:
+        input_func: A function that returns a string (user input).
+        is_valid: A function that returns True if the input is valid.
+
+    Returns:
+        A valid input string.
+    """
+    while True:
+        user_input = input_func()
+        if is_valid(user_input):
+            return user_input
+        print(invalid_message)
+
+
+def get_input_with_default(prompt: str, default: str) -> str:
+    """
+    Prompt the user for input and return their response.
+    If they enter nothing, return the provided default value.
+
+    Args:
+        prompt (str): The message to show the user.
+        default (str): The default value if user inputs nothing.
+
+    Returns:
+        str: The user's input or the default value.
+    """
+    full_prompt = f"{prompt} (default: {default}): "
+    user_input = input(full_prompt).strip()
+    return user_input if user_input else default
 
 def get_yes_no(prompt="Please enter yes or no") -> bool:
     yes_variants = {"yes", "y", "Y", "Yes" ""}
