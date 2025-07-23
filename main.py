@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Dict, Callable
 
 def has_no_spaces(s: str) -> bool:
     return ' ' not in s
@@ -52,55 +52,61 @@ def get_yes_no(prompt="Please enter yes or no") -> bool:
             print("Invalid input. Please enter yes or no.")
 
 def select_options(options: List[str], single_select: bool = False) -> List[str]:
+    options_dict = {str(i): option for i, option in enumerate(options, start=1)}
+    return select_options_from_dict(options_dict, single_select=single_select, allow_all=not single_select)
+
+
+def select_options_from_dict(
+    options_dict: Dict[str, str], 
+    single_select: bool = False,
+    allow_all: bool = True
+) -> List[str]:
     """
-    Displays a list of options and allows the user to select one or more options
-    by entering the corresponding numbers, separated by spaces, or 'all' to select all.
-    If single_select is True, the user can select only one option.
+    Displays options with string keys and lets the user select by typing keys.
 
     Args:
-        options (List[str]): A list of strings representing the options.
-        single_select (bool): If True, restricts selection to a single option.
+        options_dict (Dict[str, str]): Keys and option strings.
+        single_select (bool): Allow only one selection.
+        allow_all (bool): Allow typing 'all' to select all options (only if not single_select).
 
     Returns:
-        List[str]: The selected options.
+        List[str]: Selected options (values).
     """
-    if not options:
+    if not options_dict:
         print("No options available to select.")
         return []
 
-    # Display the options with their corresponding numbers
     if single_select:
-        print("Please select one option by entering its number:")
+        print("Please select one option by entering its key:")
     else:
-        print("Please select one or more options by entering their numbers separated by spaces:")
+        print("Please select one or more options by entering their keys separated by spaces:")
 
-    for i, option in enumerate(options, start=1):
-        print(f"{i}. {option}")
+    max_key_len = max(len(k) for k in options_dict.keys())
+    for key, value in options_dict.items():
+        print(f"{key.rjust(max_key_len)}. {value}")
 
-    if not single_select:
+    if allow_all and not single_select:
         print("Type 'all' to select all options.")
 
+    keys_set = set(options_dict.keys())
+
     while True:
-        # Get the user's input
         user_input = input("\nEnter your selection: ").strip().lower()
 
-        if not single_select and user_input == "all":
-            # Return all options if 'all' is entered
-            return options
+        if allow_all and not single_select and user_input == "all":
+            return list(options_dict.values())
 
-        # Validate numerical input
-        try:
-            selected_indices = list(map(int, user_input.split()))
-            if single_select:
-                if len(selected_indices) != 1:
-                    raise ValueError("Please select exactly one option.")
-            if all(1 <= idx <= len(options) for idx in selected_indices):
-                # Return the selected options
-                return [options[idx - 1] for idx in selected_indices]
-            else:
-                raise ValueError("Input numbers are out of range.")
-        except ValueError as e:
-            print(f"Invalid input: {e}. Please try again.")
+        selected_keys = user_input.split()
+
+        if single_select and len(selected_keys) != 1:
+            print("Invalid input: Please select exactly one option.")
+            continue
+
+        if all(key in keys_set for key in selected_keys):
+            return [options_dict[key] for key in selected_keys]
+        else:
+            print("Invalid input: One or more keys are not valid. Please try again.")
+
 
 import os
 from pathlib import Path
