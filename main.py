@@ -57,15 +57,60 @@ def get_yes_no(prompt="Please enter yes or no") -> bool:
             print("Invalid input. Please enter yes or no.")
 
 
-def select_options(options: List[str], single_select: bool = False) -> List[str]:
+def select_options_numerical(
+    options: List[str], single_select: bool = False
+) -> List[int]:
+    """
+    Prompts the user to select one or more options numerically by reusing `select_options`.
+
+    Args:
+        options (List[str]): List of option strings.
+        single_select (bool): Whether only one selection is allowed.
+
+    Returns:
+        List[int]: List of selected indices (1-based).
+    """
+    # Use the existing select_options function to get the selected option strings
+    selected_options = select_options(
+        options, single_select=single_select, return_keys=True
+    )
+
+    # Map the selected strings back to their indices
+    return [int(opt) for opt in selected_options]
+
+
+def select_option_numerical(options: List[str]) -> int:
+    """
+    Prompts the user to select a single option numerically by reusing `select_options_numerical`.
+
+    Args:
+        options (List[str]): List of option strings.
+
+    Returns:
+        int: Index (1-based) of the selected option.
+    """
+    selected_indices = select_options_numerical(options, single_select=True)
+    return selected_indices[0]
+
+
+def select_options(
+    options: List[str], single_select: bool = False, return_keys: bool = False
+) -> List[str]:
+    "the starting option has index 1"
     options_dict = {str(i): option for i, option in enumerate(options, start=1)}
     return select_options_from_dict(
-        options_dict, single_select=single_select, allow_all=not single_select
+        options_dict,
+        single_select=single_select,
+        allow_all=not single_select,
+        return_keys=return_keys,
     )
 
 
 def select_options_from_dict(
-    options_dict: Dict[str, str], single_select: bool = False, allow_all: bool = True
+    options_dict: Dict[str, str],
+    single_select: bool = False,
+    allow_all: bool = True,
+    return_keys: bool = False,
 ) -> List[str]:
     """
     Displays options with string keys and lets the user select by typing keys.
@@ -74,9 +119,10 @@ def select_options_from_dict(
         options_dict (Dict[str, str]): Keys and option strings.
         single_select (bool): Allow only one selection.
         allow_all (bool): Allow typing 'all' to select all options (only if not single_select).
+        return_keys (bool): If True, return selected keys instead of values.
 
     Returns:
-        List[str]: Selected options (values).
+        List[str]: Selected keys or values depending on return_keys.
     """
     if not options_dict:
         print("No options available to select.")
@@ -102,7 +148,11 @@ def select_options_from_dict(
         user_input = input("\nEnter your selection: ").strip().lower()
 
         if allow_all and not single_select and user_input == "all":
-            return list(options_dict.values())
+            return (
+                list(options_dict.keys())
+                if return_keys
+                else list(options_dict.values())
+            )
 
         selected_keys = user_input.split()
 
@@ -111,7 +161,11 @@ def select_options_from_dict(
             continue
 
         if all(key in keys_set for key in selected_keys):
-            return [options_dict[key] for key in selected_keys]
+            return (
+                selected_keys
+                if return_keys
+                else [options_dict[key] for key in selected_keys]
+            )
         else:
             print("Invalid input: One or more keys are not valid. Please try again.")
 
@@ -121,7 +175,7 @@ from pathlib import Path
 
 
 def interactively_select_directory(root_path: Path) -> str:
-    """Navigate directories interactively and return the selected directory path."""
+    """Navigate directories interactively and return the selected directory path. Only allows to select from existing directories"""
     current_path = os.path.abspath(root_path)
 
     while True:
