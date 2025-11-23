@@ -1,9 +1,13 @@
 from typing import List, Dict, Callable
 
-def has_no_spaces(s: str) -> bool:
-    return ' ' not in s
 
-def get_validated_input(input_func: Callable[[], str], is_valid: Callable[[str], bool], invalid_message: str) -> str:
+def has_no_spaces(s: str) -> bool:
+    return " " not in s
+
+
+def get_validated_input(
+    input_func: Callable[[], str], is_valid: Callable[[str], bool], invalid_message: str
+) -> str:
     """
     Repeatedly calls input_func until the result passes is_valid.
 
@@ -33,17 +37,18 @@ def get_input_with_default(prompt: str, default: str) -> str:
     Returns:
         str: The user's input or the default value.
     """
-    full_prompt = f"{prompt} (default: {default}): "
+    full_prompt = f"{prompt} (default: {default}, press Enter to use default): "
     user_input = input(full_prompt).strip()
     return user_input if user_input else default
+
 
 def get_yes_no(prompt="Please enter yes or no") -> bool:
     yes_variants = {"yes", "y", "Y", "Yes" ""}
     no_variants = {"no", "n", "N", "No"}
-    
+
     while True:
         response = input(prompt + ": ").strip().lower()
-        
+
         if response in yes_variants:
             return True
         elif response in no_variants:
@@ -51,15 +56,16 @@ def get_yes_no(prompt="Please enter yes or no") -> bool:
         else:
             print("Invalid input. Please enter yes or no.")
 
+
 def select_options(options: List[str], single_select: bool = False) -> List[str]:
     options_dict = {str(i): option for i, option in enumerate(options, start=1)}
-    return select_options_from_dict(options_dict, single_select=single_select, allow_all=not single_select)
+    return select_options_from_dict(
+        options_dict, single_select=single_select, allow_all=not single_select
+    )
 
 
 def select_options_from_dict(
-    options_dict: Dict[str, str], 
-    single_select: bool = False,
-    allow_all: bool = True
+    options_dict: Dict[str, str], single_select: bool = False, allow_all: bool = True
 ) -> List[str]:
     """
     Displays options with string keys and lets the user select by typing keys.
@@ -79,7 +85,9 @@ def select_options_from_dict(
     if single_select:
         print("Please select one option by entering its key:")
     else:
-        print("Please select one or more options by entering their keys separated by spaces:")
+        print(
+            "Please select one or more options by entering their keys separated by spaces:"
+        )
 
     max_key_len = max(len(k) for k in options_dict.keys())
     for key, value in options_dict.items():
@@ -111,13 +119,18 @@ def select_options_from_dict(
 import os
 from pathlib import Path
 
+
 def interactively_select_directory(root_path: Path) -> str:
     """Navigate directories interactively and return the selected directory path."""
     current_path = os.path.abspath(root_path)
 
     while True:
         # Get directories in the current path
-        dirs = [d for d in os.listdir(current_path) if os.path.isdir(os.path.join(current_path, d))]
+        dirs = [
+            d
+            for d in os.listdir(current_path)
+            if os.path.isdir(os.path.join(current_path, d))
+        ]
         dirs.sort()
 
         # Display current path and available directories
